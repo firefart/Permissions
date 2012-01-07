@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Permissions</string>
+    <!-- Title of permission settings Screen -->
+    <string name="permission_settings_title">Show Permissions</string>
+    <!-- Summary of permission settings Screen -->
+    <string name="permission_settings_summary">Displays a list of permissions and which apps are using them</string>
+    <!-- Loading text displayed while loading permissions -->
+    <string name="permission_settings_loading">Loading</string>
+    <!-- Text displayed on Refresh Menu option -->
+    <string name="refresh">Refresh List</string>
+</resources>
