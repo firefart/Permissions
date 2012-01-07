@@ -18,8 +18,11 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,10 +42,12 @@ public class Permissions extends ExpandableListActivity implements Runnable {
     private static final String PACKAGENAME = "PackageName";
     private static final String SECURITYLEVEL = "Securitylevel";
 
-    // Taken from com.android.settings.ManageApplications (APP_PKG_NAME)
-    private static final String SETTINGS_EXTRA = "pkg";
-    private static final String SETTINGS_CLASS_NAME = "com.android.settings";
-    private static final String SETTINGS_ACTIVITY = "com.android.settings.InstalledAppDetails";
+    // Installed App Details
+    private static final String SCHEME = "package";
+    private static final String APP_PKG_NAME_21 = "com.android.settings.ApplicationPkgName";
+    private static final String APP_PKG_NAME_22 = "pkg";
+    private static final String APP_DETAILS_PACKAGE_NAME = "com.android.settings";
+    private static final String APP_DETAILS_CLASS_NAME = "com.android.settings.InstalledAppDetails";
 
     private int mDangerousColor;
     private int mDefaultTextColor;
@@ -69,10 +74,7 @@ public class Permissions extends ExpandableListActivity implements Runnable {
     @Override
     public boolean onChildClick(ExpandableListView parent, View v, int groupPosition,
             int childPosition, long id) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setClassName(SETTINGS_CLASS_NAME, SETTINGS_ACTIVITY);
-        intent.putExtra(SETTINGS_EXTRA, (String)v.getTag());
-        startActivity(intent);
+        showInstalledAppDetails(this, (String) v.getTag());
         return super.onChildClick(parent, v, groupPosition, childPosition, id);
     }
 
@@ -229,5 +231,23 @@ public class Permissions extends ExpandableListActivity implements Runnable {
         }
         permList.clear();
         handler.sendEmptyMessage(0);
+    }
+
+    public static void showInstalledAppDetails(Context context, String packageName) {
+        Intent intent = new Intent();
+        final int apiLevel = Build.VERSION.SDK_INT;
+        if (apiLevel >= 9) { // above 2.3
+            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            Uri uri = Uri.fromParts(SCHEME, packageName, null);
+            intent.setData(uri);
+        } else { // below 2.3
+            final String appPkgName = (apiLevel == 8 ? APP_PKG_NAME_22
+                    : APP_PKG_NAME_21);
+            intent.setAction(Intent.ACTION_VIEW);
+            intent.setClassName(APP_DETAILS_PACKAGE_NAME,
+                    APP_DETAILS_CLASS_NAME);
+            intent.putExtra(appPkgName, packageName);
+        }
+        context.startActivity(intent);
     }
 }
